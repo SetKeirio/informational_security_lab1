@@ -135,7 +135,7 @@
           <spotbugsXmlOutputDirectory>${project.build.directory}</spotbugsXmlOutputDirectory>
           <htmlOutput>true</htmlOutput>
           <outputDirectory>${project.build.directory}</outputDirectory>
-          <failOnError>false</failOnError>
+          <failOnError>true</failOnError>
         </configuration>
       </plugin>
 
@@ -153,7 +153,7 @@
         <configuration>
           <format>HTML</format>
           <failBuildOnCVSS>0</failBuildOnCVSS>
-          <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+          <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
           <autoUpdate>false</autoUpdate>
           <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
           <autoUpdate>true</autoUpdate>
