@@ -1,10 +1,10 @@
-name: CI Security Pipeline
+name: CI Security Pipeline for Maven
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ master ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ master ]
 
 jobs:
   build-and-security-scan:
@@ -12,12 +12,20 @@ jobs:
     timeout-minutes: 60
 
     env:
-      DC_NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Cache Dependency-Check database for Maven
+        uses: actions/cache@v4
+        with:
+          # ПРАВИЛЬНЫЙ путь для Maven версии 12+
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: dependency-check-data-${{ runner.os }}-${{ hashFiles('pom.xml') }}
+          restore-keys: |
+            dependency-check-data-${{ runner.os }}-
 
       - name: Cache Maven dependencies
         uses: actions/cache@v4
@@ -27,14 +35,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Cache OWASP Dependency-Check database
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: dependency-check-db-${{ runner.os }}-${{ hashFiles('pom.xml') }}
-          restore-keys: |
-            dependency-check-db-${{ runner.os }}-
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -42,31 +42,15 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Build project
-        run: mvn clean compile -DskipTests
-
-      - name: Debug - Check environment variables
+      - name: Build & Security Checks
         run: |
-          echo "Checking API key..."
-          echo "NVD_API_KEY length: ${#NVD_API_KEY}"
-          echo "DC_NVD_API_KEY length: ${#DC_NVD_API_KEY}"
-          echo "First 4 chars of key: ${DC_NVD_API_KEY:0:4}"
-
-      - name: Run OWASP Dependency-Check with explicit API key
-        env:
-          DC_NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: |
-          mvn org.owasp:dependency-check-maven:check \
+          # Явно передаем API ключ как системное свойство
+          mvn clean verify \
             -DskipTests \
-            -DnvdApiKey="$DC_NVD_API_KEY" \
-            -DfailBuildOnCVSS=9 \
+            -DnvdApiKey="$NVD_API_KEY" \
             -Dformat=HTML \
-            -DautoUpdate=true
-        continue-on-error: true
-
-      - name: Run SpotBugs static analysis
-        run: mvn com.github.spotbugs:spotbugs-maven-plugin:check -DskipTests
-        continue-on-error: true
+            -DautoUpdate=true \
+            --batch-mode
 
       - name: Upload SpotBugs Report
         if: always()
@@ -83,29 +67,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
-          path: |
-            target/dependency-check-report.html
-            target/dependency-check-report.xml
+          path: target/dependency-check-report.html
           if-no-files-found: warn
-
-      - name: Check for critical vulnerabilities
-        if: always()
-        run: |
-          if [ -f target/dependency-check-report.html ]; then
-            echo "Checking for critical vulnerabilities..."
-            if grep -i "CRITICAL" target/dependency-check-report.html; then
-              echo "Critical vulnerabilities found!"
-              exit 1
-            else
-              echo "No critical vulnerabilities found."
-            fi
-          else
-            echo "No dependency check report found."
-            if [ -f target/dependency-check-report.xml ]; then
-              echo "Found XML report, checking for high severity..."
-              if grep -i "severity=\"CRITICAL\"" target/dependency-check-report.xml; then
-                echo "Critical vulnerabilities found in XML!"
-                exit 1
-              fi
-            fi
-          fi

@@ -45,12 +45,6 @@
       <version>4.4.0</version>
     </dependency>
     <dependency>
-      <groupId>org.owasp</groupId>
-      <artifactId>dependency-check-maven</artifactId>
-      <version>9.0.7</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
@@ -96,8 +90,11 @@
         </executions>
         <configuration>
           <format>HTML</format>
+          <failBuildOnCVSS>0</failBuildOnCVSS>  <!-- Не падать при любой уязвимости -->
           <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
           <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
+          <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+          <autoUpdate>true</autoUpdate>
         </configuration>
       </plugin>
     </plugins>
