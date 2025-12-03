@@ -15,7 +15,7 @@
   <properties>
     <java.version>17</java.version>
     <spotbugs.version>4.7.3.6</spotbugs.version>
-    <owasp.dependency-check.version>9.0.7</owasp.dependency-check.version>
+    <owasp.dependency-check.version>12.1.9</owasp.dependency-check.version>
   </properties>
   <dependencies>
     <dependency>
@@ -92,8 +92,8 @@
           <format>HTML</format>
           <failBuildOnCVSS>0</failBuildOnCVSS>
           <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+          <autoUpdate>false</autoUpdate>
           <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
-          <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
           <autoUpdate>true</autoUpdate>
         </configuration>
       </plugin>
