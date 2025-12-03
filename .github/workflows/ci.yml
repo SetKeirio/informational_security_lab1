@@ -60,7 +60,7 @@ jobs:
           DC_NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           mvn org.owasp:dependency-check-maven:check -DskipTests -DautoUpdate=false -DskipUpdate=true -DnvdApiKey="$DC_NVD_API_KEY" -Dformat=HTML -DfailBuildOnCVSS=0 --batch-mode
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Run SpotBugs static analysis
         run: |
@@ -72,7 +72,7 @@ jobs:
                       -DskipTests
 
           mvn com.github.spotbugs:spotbugs-maven-plugin:check -DskipTests
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Upload SpotBugs Report
         if: always()
