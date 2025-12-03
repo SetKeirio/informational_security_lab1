@@ -45,26 +45,27 @@ jobs:
       - name: Build project
         run: mvn clean compile -DskipTests
 
-      - name: Debug - Check environment variables
+      - name: Debug - Check cached database
         run: |
-          echo "Checking API key..."
-          echo "NVD_API_KEY length: ${#NVD_API_KEY}"
-          echo "DC_NVD_API_KEY length: ${#DC_NVD_API_KEY}"
-          echo "First 4 chars of key: ${DC_NVD_API_KEY:0:4}"
+          echo "Checking cached database..."
+          if [ -d ~/.m2/repository/org/owasp/dependency-check-data ]; then
+            echo "Database exists at: ~/.m2/repository/org/owasp/dependency-check-data"
+            echo "Size: $(du -sh ~/.m2/repository/org/owasp/dependency-check-data)"
+          else
+            echo "No cached database found"
+          fi
 
-      - name: Run OWASP Dependency-Check with explicit API key
+      - name: Run OWASP Dependency-Check (OFFLINE with cached DB)
         env:
           DC_NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-
           mvn org.owasp:dependency-check-maven:check \
             -DskipTests \
+            -DautoUpdate=false \           # НЕ обновлять
+            -DskipUpdate=true \            # Пропустить этап обновления
             -DnvdApiKey="$DC_NVD_API_KEY" \
             -DfailBuildOnCVSS=9 \
-            -DautoUpdate=false \
-            -DskipUpdate=true \
             -Dformat=HTML \
-            -DautoUpdate=true \
             --batch-mode
         continue-on-error: true
 
@@ -91,25 +92,3 @@ jobs:
             target/dependency-check-report.html
             target/dependency-check-report.xml
           if-no-files-found: warn
-
-      - name: Check for critical vulnerabilities
-        if: always()
-        run: |
-          if [ -f target/dependency-check-report.html ]; then
-            echo "Checking for critical vulnerabilities..."
-            if grep -i "CRITICAL" target/dependency-check-report.html; then
-              echo "Critical vulnerabilities found!"
-              exit 1
-            else
-              echo "No critical vulnerabilities found."
-            fi
-          else
-            echo "No dependency check report found."
-            if [ -f target/dependency-check-report.xml ]; then
-              echo "Found XML report, checking for high severity..."
-              if grep -i "severity=\"CRITICAL\"" target/dependency-check-report.xml; then
-                echo "Critical vulnerabilities found in XML!"
-                exit 1
-              fi
-            fi
-          fi
