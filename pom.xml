@@ -109,7 +109,6 @@
           <failBuildOnCVSS>0</failBuildOnCVSS>
           <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
           <autoUpdate>true</autoUpdate>
-          <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
         </configuration>
       </plugin>
     </plugins>
