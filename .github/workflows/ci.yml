@@ -63,7 +63,15 @@ jobs:
         continue-on-error: true
 
       - name: Run SpotBugs static analysis
-        run: mvn com.github.spotbugs:spotbugs-maven-plugin:check -DskipTests
+        run: |
+          mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs \
+                      -Dspotbugs.outputFormat=html,xml \
+                      -Dspotbugs.outputDirectory=target \
+                      -Dspotbugs.htmlOutputFile=spotbugs.html \
+                      -Dspotbugs.xmlOutputFile=spotbugs.xml \
+                      -DskipTests
+
+          mvn com.github.spotbugs:spotbugs-maven-plugin:check -DskipTests
         continue-on-error: true
 
       - name: Upload SpotBugs Report

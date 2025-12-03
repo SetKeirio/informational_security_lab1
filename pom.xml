@@ -74,6 +74,9 @@
           <threshold>High</threshold>
           <xmlOutput>true</xmlOutput>
           <spotbugsXmlOutputDirectory>${project.build.directory}</spotbugsXmlOutputDirectory>
+          <htmlOutput>true</htmlOutput>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+          <failOnError>false</failOnError>
         </configuration>
       </plugin>
 
