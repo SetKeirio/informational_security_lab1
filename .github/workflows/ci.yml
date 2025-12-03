@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 60
 
     env:
+      DC_NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
     steps:
@@ -29,10 +30,10 @@ jobs:
       - name: Cache OWASP Dependency-Check database
         uses: actions/cache@v4
         with:
-          path: ~/.dependency-check
-          key: dependency-check-db-${{ runner.os }}
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: dependency-check-db-${{ runner.os }}-${{ hashFiles('pom.xml') }}
           restore-keys: |
-            dependency-check-db-${{ runner.os }}
+            dependency-check-db-${{ runner.os }}-
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -44,8 +45,23 @@ jobs:
       - name: Build project
         run: mvn clean compile -DskipTests
 
-      - name: Run OWASP Dependency-Check
-        run: mvn org.owasp:dependency-check-maven:check -DskipTests
+      - name: Debug - Check environment variables
+        run: |
+          echo "Checking API key..."
+          echo "NVD_API_KEY length: ${#NVD_API_KEY}"
+          echo "DC_NVD_API_KEY length: ${#DC_NVD_API_KEY}"
+          echo "First 4 chars of key: ${DC_NVD_API_KEY:0:4}"
+
+      - name: Run OWASP Dependency-Check with explicit API key
+        env:
+          DC_NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          mvn org.owasp:dependency-check-maven:check \
+            -DskipTests \
+            -DnvdApiKey="$DC_NVD_API_KEY" \
+            -DfailBuildOnCVSS=9 \
+            -Dformat=HTML \
+            -DautoUpdate=true
         continue-on-error: true
 
       - name: Run SpotBugs static analysis
@@ -57,7 +73,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: spotbugs-report
-          path: target/spotbugs.xml
+          path: |
+            target/spotbugs.xml
+            target/spotbugs.html
           if-no-files-found: warn
 
       - name: Upload Dependency-Check Report
@@ -65,14 +83,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
-          path: target/dependency-check-report.html
+          path: |
+            target/dependency-check-report.html
+            target/dependency-check-report.xml
           if-no-files-found: warn
 
       - name: Check for critical vulnerabilities
         if: always()
         run: |
           if [ -f target/dependency-check-report.html ]; then
-            if grep -q "CRITICAL" target/dependency-check-report.html; then
+            echo "Checking for critical vulnerabilities..."
+            if grep -i "CRITICAL" target/dependency-check-report.html; then
               echo "Critical vulnerabilities found!"
               exit 1
             else
@@ -80,4 +101,11 @@ jobs:
             fi
           else
             echo "No dependency check report found."
+            if [ -f target/dependency-check-report.xml ]; then
+              echo "Found XML report, checking for high severity..."
+              if grep -i "severity=\"CRITICAL\"" target/dependency-check-report.xml; then
+                echo "Critical vulnerabilities found in XML!"
+                exit 1
+              fi
+            fi
           fi
