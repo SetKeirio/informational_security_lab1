@@ -18,7 +18,6 @@ public class AuthenticationTokenResponse {
         this.expiresIn = expiresIn;
     }
 
-    // Геттеры и сеттеры
     public String getAccessToken() {
         return accessToken;
     }
