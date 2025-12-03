@@ -61,8 +61,11 @@ jobs:
             -DskipTests \
             -DnvdApiKey="$DC_NVD_API_KEY" \
             -DfailBuildOnCVSS=9 \
+            -DautoUpdate=false \
+            -DskipUpdate=true \
             -Dformat=HTML \
-            -DautoUpdate=true
+            -DautoUpdate=true \
+            --batch-mode
         continue-on-error: true
 
       - name: Run SpotBugs static analysis
