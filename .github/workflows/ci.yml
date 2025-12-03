@@ -55,18 +55,11 @@ jobs:
             echo "No cached database found"
           fi
 
-      - name: Run OWASP Dependency-Check (OFFLINE with cached DB)
+      - name: Run OWASP Dependency-Check
         env:
           DC_NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          mvn org.owasp:dependency-check-maven:check \
-            -DskipTests \
-            -DautoUpdate=false \           # НЕ обновлять
-            -DskipUpdate=true \            # Пропустить этап обновления
-            -DnvdApiKey="$DC_NVD_API_KEY" \
-            -DfailBuildOnCVSS=9 \
-            -Dformat=HTML \
-            --batch-mode
+          mvn org.owasp:dependency-check-maven:check -DskipTests -DautoUpdate=false -DskipUpdate=true -DnvdApiKey="$DC_NVD_API_KEY" -Dformat=HTML -DfailBuildOnCVSS=0 --batch-mode
         continue-on-error: true
 
       - name: Run SpotBugs static analysis

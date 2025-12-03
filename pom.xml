@@ -90,7 +90,7 @@
         </executions>
         <configuration>
           <format>HTML</format>
-          <failBuildOnCVSS>0</failBuildOnCVSS>  <!-- Не падать при любой уязвимости -->
+          <failBuildOnCVSS>0</failBuildOnCVSS>
           <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
           <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
           <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
