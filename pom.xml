@@ -136,13 +136,6 @@
           <htmlOutput>true</htmlOutput>
           <outputDirectory>${project.build.directory}</outputDirectory>
           <failOnError>false</failOnError>
-          <plugins>
-            <plugin>
-              <groupId>com.h3x3lf1y.spotbugs</groupId>
-              <artifactId>spotbugs-contrib</artifactId>
-              <version>7.4.7</version>
-            </plugin>
-          </plugins>
         </configuration>
       </plugin>
 
