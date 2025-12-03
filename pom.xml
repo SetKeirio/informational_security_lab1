@@ -21,7 +21,7 @@
     <snakeyaml.version>2.2</snakeyaml.version>
     <jackson.version>2.17.1</jackson.version>
     <angus-activation.version>2.0.3</angus-activation.version>
-    <tomcat.version>10.1.45</tomcat.version>
+    <tomcat.version>10.1.47</tomcat.version>
   </properties>
   <dependencies>
     <dependency>
