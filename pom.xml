@@ -14,13 +14,33 @@
   <url>http://maven.apache.org</url>
   <properties>
     <java.version>17</java.version>
-    <spotbugs.version>4.7.3.6</spotbugs.version>
+    <spotbugs.version>4.9.8.2</spotbugs.version>
     <owasp.dependency-check.version>12.1.9</owasp.dependency-check.version>
+    <postgresql.version>42.7.3</postgresql.version>
+    <logback.version>1.4.14</logback.version>
+    <snakeyaml.version>2.2</snakeyaml.version>
+    <jackson.version>2.17.1</jackson.version>
+    <spring-boot.version>3.2.4</spring-boot.version>
+    <tomcat.version>10.1.35</tomcat.version>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -37,8 +57,39 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <scope>runtime</scope>
+      <version>${postgresql.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${snakeyaml.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>com.auth0</groupId>
       <artifactId>java-jwt</artifactId>
@@ -63,6 +114,14 @@
         <version>${spotbugs.version}</version>
         <executions>
           <execution>
+            <id>spotbugs</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>spotbugs</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>check</id>
             <phase>verify</phase>
             <goals>
               <goal>check</goal>
@@ -77,6 +136,13 @@
           <htmlOutput>true</htmlOutput>
           <outputDirectory>${project.build.directory}</outputDirectory>
           <failOnError>false</failOnError>
+          <plugins>
+            <plugin>
+              <groupId>com.h3x3lf1y.spotbugs</groupId>
+              <artifactId>spotbugs-contrib</artifactId>
+              <version>7.4.7</version>
+            </plugin>
+          </plugins>
         </configuration>
       </plugin>
 
